@@ -5,3 +5,5 @@ direnv.sh
 *.swp
 bin
 ssh.sh
+remote_server.sh
+.VIM_LOCAL_PORT
