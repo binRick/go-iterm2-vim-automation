@@ -70,7 +70,7 @@ var (
 	_app          *itermctl.App
 	ctrl_seq1     = itermctl.NewCustomControlSequenceEscaper(CONTROL_SEQUENCE_NAME)
 	current_focus = &CurrentFocus{}
-	err_msg       = ansi.ColorFunc("red+bh:white+d")
+	err_msg       = ansi.ColorFunc("red")
 )
 
 type CurrentFocus struct {
@@ -102,9 +102,8 @@ type ClockKnobs struct {
 }
 
 var header = pterm.HeaderPrinter{
-	TextStyle:       pterm.NewStyle(pterm.FgYellow, pterm.Bold),
-	BackgroundStyle: pterm.NewStyle(pterm.BgBlack),
-	Margin:          5,
+	TextStyle: pterm.NewStyle(pterm.FgYellow, pterm.Bold),
+	Margin:    5,
 }
 var pr = header.Println
 

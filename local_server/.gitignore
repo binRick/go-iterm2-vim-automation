@@ -3,3 +3,5 @@ examples
 direnv.sh
 .envrc
 *.swp
+bin
+ssh.sh
