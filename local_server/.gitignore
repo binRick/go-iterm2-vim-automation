@@ -1,1 +1,4 @@
 examples
+.direnv
+direnv.sh
+.envrc

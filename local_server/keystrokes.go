@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"dev.local/types"
 	"github.com/k0kubun/pp"
 	"github.com/pterm/pterm"
 	"mrz.io/itermctl"
@@ -27,8 +28,8 @@ func init() {
 	test_parse_crash_msg()
 }
 
-func get_iterm_profile_from_vim_crash(crash *VimCrash) (*ItermProfile, error) {
-	p := ItermProfile{}
+func get_iterm_profile_from_vim_crash(crash *VimCrash) (*types.ItermProfile, error) {
+	p := types.ItermProfile{}
 	if len(crash.VimFilePath) < 1 {
 		err_msg := fmt.Sprintf("Vim crash has an invalid vim file path of '%s'", crash.VimFilePath)
 		return &p, errors.New(err_msg)

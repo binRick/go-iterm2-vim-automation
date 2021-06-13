@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"dev.local/types"
 )
 
-func get_remote_vms(local_port uint) (*[]ItermProfile, error) {
-	var r []ItermProfile
+func get_remote_vms(local_port uint) (*[]types.ItermProfile, error) {
+	var r []types.ItermProfile
 	url := fmt.Sprintf(`http://localhost:%d/%s`, VIM_LOCAL_PORT, `list`)
 
 	resp, err := http.Get(url)
