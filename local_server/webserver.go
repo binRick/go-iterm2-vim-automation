@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/mux"
 	"github.com/k0kubun/pp"
@@ -54,6 +55,81 @@ func ListIterm2() *[]Iterm2 {
 	return &r
 }
 
+type Iterm2NewTabResponse struct {
+	Hostname      string
+	Directory     string
+	NewTabIndex   uint32
+	WindowID      string
+	NewTabProfile string
+	SessionID     string
+
+	Result   string
+	SendText string
+}
+
+func HandleNewIterm2TabRequest(w http.ResponseWriter, r *http.Request) {
+
+	_q_hostname, _q_hostname_ok := r.URL.Query()["hostname"]
+	_q_directory, _q_directory_ok := r.URL.Query()["directory"]
+
+	pp.Println(
+		_q_hostname, _q_hostname_ok,
+		_q_directory, _q_directory_ok,
+	)
+
+	_hostname, err := url.QueryUnescape(_q_hostname[0])
+	F(err)
+	hostname := _hostname
+
+	_directory, err := url.QueryUnescape(_q_directory[0])
+	F(err)
+	directory := _directory
+	pp.Println(
+		_directory,
+		directory,
+	)
+	windowid, err := _app.ActiveTerminalWindowId()
+	F(err)
+	sess := _app.ActiveSession()
+	sessid := sess.Id()
+	cur_tab, err := _app.SelectedTabId()
+	F(err)
+	pp.Println(cur_tab)
+	var new_tab_index uint32 = 1
+	///	pp.Println(sess)
+	res := Iterm2NewTabResponse{
+		Hostname:      hostname,
+		Directory:     directory,
+		NewTabProfile: `Goonies`,
+		NewTabIndex:   new_tab_index,
+		WindowID:      windowid,
+		SessionID:     sessid,
+	}
+
+	new_tab_response, err := _app.CreateTab(res.WindowID, res.NewTabIndex, res.NewTabProfile)
+	F(err)
+	//	pp.Println(new_tab_response)
+
+	res.Result = fmt.Sprintf("Created Tab #%d", new_tab_response.TabId)
+
+	if res.Hostname == `localhost` {
+
+	} else {
+		if len(res.Directory) > 0 {
+			res.SendText = fmt.Sprintf(`cd %s`, res.Directory)
+		}
+	}
+
+	if len(res.SendText) > 0 {
+		_app.ActiveSession().SendText(res.SendText+"\n", false)
+	}
+
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		log.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	return
+}
 func HandleListVims(w http.ResponseWriter, r *http.Request) {
 	vims, err := get_remote_vms(VIM_LOCAL_PORT)
 	F(err)
@@ -74,9 +150,9 @@ func HandleListIterm2(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
-
 func add_routes(router *mux.Router) {
 	router.HandleFunc("/api/chrome/new_tab/{url:.*}", HandleWebserverRequest).Methods(http.MethodGet)
+	router.HandleFunc("/api/iterm2/new_tab", HandleNewIterm2TabRequest).Methods(http.MethodGet)
 	router.HandleFunc("/api/vim/test", HandleWebserverVimTest).Methods(http.MethodGet)
 	router.HandleFunc("/api/vims/list", HandleListVims).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/list", HandleListIterm2).Methods(http.MethodGet)

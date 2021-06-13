@@ -2,3 +2,4 @@ examples
 .direnv
 direnv.sh
 .envrc
+*.swp
