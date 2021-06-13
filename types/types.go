@@ -22,3 +22,9 @@ type ItermProfile struct {
 	IP                 string
 	VimRunningDuration time.Duration
 }
+
+type CurrentFocus struct {
+	Session string
+	Window  string
+	Tab     string
+}

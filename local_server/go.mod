@@ -20,3 +20,5 @@ require (
 	github.com/tklauser/go-sysconf v0.3.6 // indirect
 	mrz.io/itermctl v0.0.3
 )
+
+replace dev.local/utils => ./../utils/.
