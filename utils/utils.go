@@ -11,8 +11,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ExecAsync(_cmd string, stdout_callback func(string), stderr_callback func(string)) {
-	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf(`%s`, _cmd))
+func ExecAsync(stdout_callback func(string), stderr_callback func(string), _cmd string, _args ...string) {
+	cmd := exec.Command(_cmd, _args...)
 	var wg sync.WaitGroup
 	o := make(chan struct{})
 	e := make(chan struct{})
