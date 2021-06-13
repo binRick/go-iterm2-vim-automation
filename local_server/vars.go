@@ -8,6 +8,12 @@ import (
 var (
 	VIM_QUIT_TEXT = "q"
 )
+
+var (
+	MONITOR_CONTROL_SEQUENCE = true
+	CONTROL_SEQUENCE_REGEX   = `vim-iterm`
+	CONTROL_SEQUENCE_NAME    = `vim-iterm`
+)
 var (
 	KEYSTROKE_ACTION_DEBUG_DETAILED = false
 	KEYSTROKE_ACTION_DEBUG_RESULT   = true

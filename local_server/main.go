@@ -6,11 +6,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
 	"os/signal"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -26,6 +28,39 @@ import (
 	"mrz.io/itermctl/rpc"
 )
 
+func init() {
+	go get_procs()
+	tempFile, err := ioutil.TempFile("", "*-custom_control_test")
+	F(err)
+
+	_, err = tempFile.Write([]byte(ctrl_seq1.Escape("test-seq")))
+
+	F(err)
+	pp.Println(tempFile.Name())
+}
+func monitor_control_seq() {
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	re := regexp.MustCompile("test-seq")
+	fmt.Println(
+		"CONTROL_SEQUENCE_NAME:", CONTROL_SEQUENCE_NAME,
+	)
+	notifications, err := itermctl.MonitorCustomControlSequences(ctx, _conn, CONTROL_SEQUENCE_NAME, re, itermctl.AllSessions)
+	F(err)
+
+	select {
+	case notification := <-notifications:
+		pp.Println(notification.Notification.GetSession())
+		pp.Println(notification.Matches[0])
+	}
+
+	for {
+		time.Sleep(5 * time.Second)
+	}
+}
+
 const (
 	DEFAULT_FORCE_CLOSE = false
 )
@@ -33,7 +68,7 @@ const (
 var (
 	_conn         *itermctl.Connection
 	_app          *itermctl.App
-	ctrl_seq1     = itermctl.NewCustomControlSequenceEscaper(`ctrl_seq1`)
+	ctrl_seq1     = itermctl.NewCustomControlSequenceEscaper(CONTROL_SEQUENCE_NAME)
 	current_focus = &CurrentFocus{}
 	err_msg       = ansi.ColorFunc("red+bh:white+d")
 )
@@ -64,10 +99,6 @@ var Clock = rpc.StatusBarComponent{
 type ClockKnobs struct {
 	Location string
 	Option1  string
-}
-
-func init() {
-	go get_procs()
 }
 
 var header = pterm.HeaderPrinter{
@@ -450,6 +481,10 @@ func main() {
 	F(err)
 	_app = app
 	monitor_focus()
+	monitor_keystrokes(conn)
+	if MONITOR_CONTROL_SEQUENCE {
+		go monitor_control_seq()
+	}
 	signals := make(chan os.Signal)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 
@@ -462,7 +497,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	monitor_keystrokes(conn)
 
 	conn.Wait()
 }

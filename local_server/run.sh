@@ -63,9 +63,9 @@ ssh_pids="$ssh_pids $!"
 
 trap kill_ssh EXIT
 
-bin=.sb
-go build -o $bin .
-cmd="./$bin $@"
-
-killall $bin 2>/dev/null ||true
+#bin=.sb
+#go build -o $bin .
+#cmd="./$bin $@"
+cmd="go run . $@"
+#killall $bin 2>/dev/null ||true
 eval $cmd
