@@ -27,15 +27,6 @@ func dump_keystroke_log() string {
 	defer m.Unlock()
 	r := ``
 	pp.Println(keystrokes)
-	/*
-		for k, vals := range ks_log {
-			pp.Println(k, vals)
-			for _, val := range vals {
-				new_r := fmt.Sprintf(`#%d => %s`, k, val)
-				r = fmt.Sprintf("%s\n%s", r, new_r)
-			}
-		}
-	*/
 	return r
 }
 
