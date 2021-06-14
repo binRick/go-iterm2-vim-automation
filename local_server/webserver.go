@@ -129,7 +129,7 @@ func HandleNewIterm2TabRequest(w http.ResponseWriter, r *http.Request) {
 	} else {
 	}
 	if len(res.Directory) > 0 {
-		res.SendText = strings.Replace(fmt.Sprintf(`cd %s && %s`, strings.Replace(strings.Replace(res.Directory, "\n", "", -1), "\r", "", -1), res.Cmd), "\n", "", -1)
+		res.SendText = strings.Replace(fmt.Sprintf(`cd %s && clear && %s; exit`, strings.Replace(strings.Replace(res.Directory, "\n", "", -1), "\r", "", -1), res.Cmd), "\n", "", -1)
 	}
 	pp.Println(res.SendText)
 
