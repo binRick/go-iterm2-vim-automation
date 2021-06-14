@@ -279,10 +279,12 @@ func HandleTestWindowID(w http.ResponseWriter, r *http.Request) {
 	lines := []string{}
 
 	for _, line := range contents.GetContents() {
-		lines = append(lines, fmt.Sprintf("%s", line.GetText()))
+		//lines = append(lines, fmt.Sprintf("%s", line.GetText()))
+		lines = append(lines, line.GetText())
 	}
 
-	output := fmt.Sprintf("%s", strings.Join(lines, "\n"))
+	//output := fmt.Sprintf("%s", strings.Join(lines, "\n"))
+	output := strings.Join(lines, "\n")
 	output_enc := base64.StdEncoding.EncodeToString([]byte(output))
 
 	if false {

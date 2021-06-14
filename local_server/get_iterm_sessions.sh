@@ -4,7 +4,7 @@ cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 
 while IFS=: read -r pid iterm_id; do
-  if ! ps -p $pid; then 
+  if ! \ps -p $pid >/dev/null 2>&1; then 
     continue
   else
     true
