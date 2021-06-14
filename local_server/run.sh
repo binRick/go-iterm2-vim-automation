@@ -4,8 +4,8 @@ cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 ARGS="$@"
 REMOTE_PORT=48923
 LOCAL_PORT=19344
-#export VIM_LOCAL_PORT=15229
-export VIM_LOCAL_PORT=$(freeport)
+export VIM_LOCAL_PORT=15229
+#export VIM_LOCAL_PORT=$(freeport)
 REMOTE_LISTEN_HOST=127.0.0.1
 rem_cmd="netstat -alntp|grep LISTEN|grep sshd|grep $REMOTE_LISTEN_HOST:$REMOTE_PORT"
 [[ -f ~/.ssh/config.none ]] || touch ~/.ssh/config.none
@@ -21,7 +21,7 @@ PORT_FORWARDS="-R $REMOTE_PORT:$REMOTE_LISTEN_HOST:$LOCAL_PORT -L $VIM_LOCAL_POR
 
 base_ssh_cmd="command ssh -oStrictHostKeyChecking=no -oLogLevel=ERROR -F ~/.ssh/config.none -oControlMaster=no $PORT_FORWARDS $REMOTE_USER@$REMOTE_SERVER"
 ssh_cmd="$base_ssh_cmd $rem_cmd"
-sleep_ssh_cmd="$base_ssh_cmd -N"
+sleep_ssh_cmd="bash -c 'while :; do $base_ssh_cmd -N; sleep .1; date; done'"
 
 ENV_FILE=~/.iterm_profile.json
 

@@ -12,6 +12,7 @@ import (
 	"dev.local/types"
 	"github.com/k0kubun/pp"
 	"github.com/pterm/pterm"
+	log "github.com/sirupsen/logrus"
 	"mrz.io/itermctl"
 )
 
@@ -180,7 +181,11 @@ func monitor_keystrokes(conn *itermctl.Connection) {
 			new_sess := _app.Session(iterm_profile.Session)
 
 			if new_sess == nil {
-				F(errors.New(fmt.Sprintf(`invalid session id %s`, iterm_profile.Session)))
+				msg := fmt.Sprintf(`[monitor_keystrokes] invalid session id %s`, iterm_profile.Session)
+
+				pp.Println(msg)
+				log.Error(msg)
+				continue
 			}
 
 			new_contents, err := new_sess.ScreenContents(nil)
