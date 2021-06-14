@@ -21,6 +21,35 @@ type Iterm2 struct {
 	Tab          *string
 }
 
+func InfoIterm2() (*[]Iterm2, error) {
+	r := []Iterm2{}
+	cur_sessions, err := _app.ListSessions()
+	F(err)
+	for _, w := range cur_sessions.Windows {
+		fmt.Println(
+			pp.Sprintf(`type: %T`, w.Tabs[0].Root.Links[0].Child),
+			pp.Sprintf(`str: %s`, w.Tabs[0].Root.Links[0].Child),
+		)
+		for _, t := range w.Tabs {
+			r = append(r, Iterm2{
+				Window:       w.WindowId,
+				Session:      `yyyyyyyyy`,
+				Tab:          t.TabId,
+				WindowNumber: w.Number,
+			})
+		}
+	}
+	/*
+			for _, w := range cur_sessions.Windows {
+			//sessid := sess.Id()
+				for =
+		r _, t := range w.Tabs {
+				}
+			}
+	*/
+	return &r, nil
+}
+
 func ListIterm2() *[]Iterm2 {
 	r := []Iterm2{}
 
@@ -143,6 +172,16 @@ func HandleNewIterm2TabRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	return
 }
+func HandleInfoIterm2(w http.ResponseWriter, r *http.Request) {
+	info, err := InfoIterm2()
+	F(err)
+
+	if err := json.NewEncoder(w).Encode(info); err != nil {
+		log.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	return
+}
 func HandleListVims(w http.ResponseWriter, r *http.Request) {
 	vims, err := get_remote_vms(VIM_LOCAL_PORT)
 	F(err)
@@ -169,6 +208,7 @@ func add_routes(router *mux.Router) {
 	router.HandleFunc("/api/vim/test", HandleWebserverVimTest).Methods(http.MethodGet)
 	router.HandleFunc("/api/vims/list", HandleListVims).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/list", HandleListIterm2).Methods(http.MethodGet)
+	router.HandleFunc("/api/iterm2/info", HandleInfoIterm2).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/activate/window/{window_id:.*}/session/{session_id:.*}/tab/{tab_id:.*}", HandleActivateWindowID).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/test/window/{window_id:.*}/session/{session_id:.*}/tab/{tab_id:.*}", HandleTestWindowID).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/close/window/{window_id:.*}/session/{session_id:.*}", HandleCloseWindowID).Methods(http.MethodGet)
