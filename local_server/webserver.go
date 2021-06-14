@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/k0kubun/pp"
@@ -58,6 +59,7 @@ func ListIterm2() *[]Iterm2 {
 type Iterm2NewTabResponse struct {
 	Hostname      string
 	Directory     string
+	Cmd           string
 	NewTabIndex   uint32
 	WindowID      string
 	NewTabProfile string
@@ -71,11 +73,17 @@ func HandleNewIterm2TabRequest(w http.ResponseWriter, r *http.Request) {
 
 	_q_hostname, _q_hostname_ok := r.URL.Query()["hostname"]
 	_q_directory, _q_directory_ok := r.URL.Query()["directory"]
+	_q_cmd, _q_cmd_ok := r.URL.Query()["cmd"]
 
 	pp.Println(
 		_q_hostname, _q_hostname_ok,
 		_q_directory, _q_directory_ok,
+		_q_cmd, _q_cmd_ok,
 	)
+
+	_cmd, err := url.QueryUnescape(_q_cmd[0])
+	F(err)
+	cmd := _cmd
 
 	_hostname, err := url.QueryUnescape(_q_hostname[0])
 	F(err)
@@ -100,25 +108,30 @@ func HandleNewIterm2TabRequest(w http.ResponseWriter, r *http.Request) {
 	res := Iterm2NewTabResponse{
 		Hostname:      hostname,
 		Directory:     directory,
+		Cmd:           cmd,
 		NewTabProfile: `Goonies`,
 		NewTabIndex:   new_tab_index,
 		WindowID:      windowid,
 		SessionID:     sessid,
 	}
-
+	pp.Println(res)
 	new_tab_response, err := _app.CreateTab(res.WindowID, res.NewTabIndex, res.NewTabProfile)
 	F(err)
 	//	pp.Println(new_tab_response)
 
 	res.Result = fmt.Sprintf("Created Tab #%d", new_tab_response.TabId)
 
+	if res.Cmd == `` {
+		res.Cmd = `echo OK`
+	}
 	if res.Hostname == `localhost` {
 
 	} else {
-		if len(res.Directory) > 0 {
-			res.SendText = fmt.Sprintf(`cd %s`, res.Directory)
-		}
 	}
+	if len(res.Directory) > 0 {
+		res.SendText = strings.Replace(fmt.Sprintf(`cd %s && %s`, strings.Replace(strings.Replace(res.Directory, "\n", "", -1), "\r", "", -1), res.Cmd), "\n", "", -1)
+	}
+	pp.Println(res.SendText)
 
 	if len(res.SendText) > 0 {
 		_app.ActiveSession().SendText(res.SendText+"\n", false)
