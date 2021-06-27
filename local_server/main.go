@@ -254,6 +254,50 @@ func monitor_focus() {
 
 }
 
+func HandleNumberOfLines(w http.ResponseWriter, r *http.Request) {
+	session_id := mux.Vars(r)["session_id"]
+	session := _app.Session(session_id)
+	if session == nil {
+		fmt.Println(fmt.Sprintf(`invalid session id %s`, session_id))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	nol, err := session.NumberOfLines()
+	F(err)
+	qty := fmt.Sprintf("%d\n", nol.History)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, qty)
+	return
+
+}
+
+func HandleDumpSessionContents(w http.ResponseWriter, r *http.Request) {
+	session_id := mux.Vars(r)["session_id"]
+	session := _app.Session(session_id)
+	if session == nil {
+		fmt.Println(fmt.Sprintf(`invalid session id %s`, session_id))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	sess_id := session.Id()
+
+	contents, err := session.ScreenContents(nil)
+	F(err)
+	lines := []string{}
+
+	for _, line := range contents.GetContents() {
+		lines = append(lines, line.GetText())
+	}
+	pp.Println(session_id, sess_id, "contents lines qty:", len(lines))
+	output := strings.Join(lines, "\n")
+	output_enc := base64.StdEncoding.EncodeToString([]byte(output))
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, output_enc)
+	return
+
+}
+
 func HandleTestWindowID(w http.ResponseWriter, r *http.Request) {
 	window_id := mux.Vars(r)["window_id"]
 	session_id := mux.Vars(r)["session_id"]

@@ -70,21 +70,27 @@ render_stdout(){
 qty_lines="$(./get_session_lines_qty.sh $session_id)"
 
 pids_report="$(ps -p $(echo -e "$pids"|tr ' ' ',') -O comm 2>/dev/null||true)"
+pids_qty="$(($(echo -e "$pids_report"|wc -l)-1))"
 
-ansi -n --green --bold "| Session: $(ansi --yellow --italic "$session_id") | "
-ansi -n --green --bold "Window: $(ansi --yellow --italic "$w") | "
-ansi -n --green --bold "Tab: $(ansi --yellow --italic "$t") | "
-ansi -n --green --bold "PID: $(ansi --yellow --italic "$pid") | "
-ansi -n --green --bold "PIDs: $(ansi --yellow --italic "$pids") | "
-ansi -n --green --bold "Qty Lines: $(ansi --yellow --italic "$qty_lines") | "
+ansi -n --green --bold "| Session $(ansi --yellow --italic "$session_id")"
+ansi -n --green --bold " > Window $(ansi --yellow --italic "#$w")"
+ansi -n --green --bold " > Tab $(ansi --yellow --italic "#$t") "
+#ansi --reset
+echo -ne "\n"
+ansi -n --green --bold "| PID $(ansi --yellow --italic "$pid")"
 
-echo -e "\n"
-ansi -n --cyan --bg-black --italic "$pids_report"
+if [[ "$pids_qty" -gt 0 ]]; then
+  ansi -n --green --bold " > $(ansi --white --bg-black --bold $pids_qty) PIDs $(ansi --yellow --italic "$pids")"
+fi
 
+echo -ne "\n"
+ansi -n --green --bold "| Session Lines Qty: $(ansi --yellow --italic "$qty_lines")"
+
+if [[ "$pids_qty" -gt 0 ]]; then
+  echo -e "\n\n$(ansi --white --bg-black --bold $pids_qty) Pids Activity:"
+  ansi -n --cyan --bg-black --italic "$pids_report"
+fi
 echo -e "\n"
 
 render_stdout
-#cmd="render_stdout"
-#|tail -n $(($TERM_HEIGHT/4))"
-
-#eval $cmd
+exit

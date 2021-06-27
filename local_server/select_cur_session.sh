@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 INITIAL_QUERY="$@"
@@ -15,10 +15,12 @@ tab_new_bat_cmd() {
   cmd="./new_bat_tab.sh {}"
   echo -e "$cmd"
 }
+
 tab_new_vim_cmd() {
   cmd="./new_vim_tab.sh {}"
   echo -e "$cmd"
 }
+
 tab_new_cmd() {
   cmd="./new_ls_tab.sh"
   echo -e "$cmd"
@@ -34,20 +36,24 @@ tab_info_cmd() {
   echo -e "$cmd1;$cmd2;$cmd3;$cmd4;"
 }
 
-fzf_cmd="fzf --height 100% --layout reverse --info inline --border \
+items_cmd="./get_cur_sessions.sh"
+
+#    --bind='ctrl-r:reload($items_cmd)' \
+fzf_cmd="fzf --height 100% --layout=reverse --info inline --border \
     --ansi \
     --header='$FZF_TITLE' \
-    --preview './test_session.sh {}' \
+    --preview='passh ./get_session_uuid_info.sh {}' \
+    --header-lines=0 \
     --border=sharp \
     -m \
     --bind 'ctrl-t:preview:$(tab_new_cmd)'\
     --bind 'ctrl-m:preview:$(tab_info_cmd)'\
     --bind 'ctrl-v:preview:$(tab_new_vim_cmd)'\
     --bind 'ctrl-b:preview:$(tab_new_bat_cmd)'\
-    --preview-window right,80%,border-vertical:sharp \
+    --preview-window=right,80%,border-vertical:sharp \
     --color 'fg:#bbccdd,fg+:#ddeeff,bg:#334455,preview-bg:#223344,border:#778899'"
 
-cmd="./get_cur_sessions.sh|$fzf_cmd"
+cmd="./get_cur_sessions.sh | $fzf_cmd"
 
->&2 echo -e "$cmd"
+#>&2 echo -e "$cmd"
 eval $cmd

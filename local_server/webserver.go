@@ -14,6 +14,19 @@ import (
 
 var WEBSERVER_PORT = 48923
 
+type Iterm2NewTabResponse struct {
+  Hostname      string
+  Directory     string
+  Cmd           string
+  NewTabIndex   uint32
+  WindowID      string
+  NewTabProfile string
+  SessionID     string
+
+  Result   string
+  SendText string
+}
+
 type Iterm2 struct {
 	Window       *string
 	WindowNumber *int32
@@ -85,18 +98,6 @@ func ListIterm2() *[]Iterm2 {
 	return &r
 }
 
-type Iterm2NewTabResponse struct {
-	Hostname      string
-	Directory     string
-	Cmd           string
-	NewTabIndex   uint32
-	WindowID      string
-	NewTabProfile string
-	SessionID     string
-
-	Result   string
-	SendText string
-}
 
 func HandleNewIterm2TabRequest(w http.ResponseWriter, r *http.Request) {
 
@@ -211,6 +212,8 @@ func add_routes(router *mux.Router) {
 	router.HandleFunc("/api/iterm2/info", HandleInfoIterm2).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/activate/window/{window_id:.*}/session/{session_id:.*}/tab/{tab_id:.*}", HandleActivateWindowID).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/test/window/{window_id:.*}/session/{session_id:.*}/tab/{tab_id:.*}", HandleTestWindowID).Methods(http.MethodGet)
+	router.HandleFunc("/api/iterm2/dump/session/{session_id:.*}", HandleDumpSessionContents).Methods(http.MethodGet)
+	router.HandleFunc("/api/iterm2/lines_qty/session/{session_id:.*}", HandleNumberOfLines).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/close/window/{window_id:.*}/session/{session_id:.*}", HandleCloseWindowID).Methods(http.MethodGet)
 
 }

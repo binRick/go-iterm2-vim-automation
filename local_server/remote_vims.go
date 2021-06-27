@@ -22,8 +22,7 @@ func get_remote_vms(local_port uint) (*[]types.ItermProfile, error) {
 	fmt.Println(
 		fmt.Sprintf("%s", bytes),
 	)
-	err = json.Unmarshal(bytes, &r)
-	F(err)
+  F(json.Unmarshal(bytes, &r))
 
 	return &r, nil
 
