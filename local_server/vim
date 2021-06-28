@@ -3,11 +3,16 @@ set -e
 cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 ARGS="$@"
 vim="$(export PATH="/bin:/usr/bin:/usr/local/bin" && command -v vim)"
+NOTIFY_INTERVAL=${NOTIFY_INTERVAL:-5}
 
 cmd="$vim $ARGS"
 cwd="$(pwd)"
 bg_pid=$$
 jo_cmd="command jo cmd='$cmd' cwd='$cwd' vim='$vim' args='$ARGS' pid=$bg_pid"
+
+swap_files(){
+  lsof -p $bg_pid | grep '/.*/.*\.swp'|tr -s ' '|cut -d' ' -f9|sort -u|grep -v '^$'|tr '\n' ' '
+}
 
 eval $jo_cmd | ./gen_seq.sh
 
@@ -15,9 +20,10 @@ export EXIT=0
 
 bg_monitor()(
   while [[ "$EXIT" != "1" && -d /proc/$bg_pid && "$bg_pid" -gt 0 ]]; do
-    eval $jo_cmd | ./gen_seq.sh
+    eval $ncmd| ./gen_seq.sh
+ncmd="$jo_cmd swap_files='$(swap_files)' NOTIFY_INTERVAL=$NOTIFY_INTERVAL"
     
-    sleep 5
+    sleep $NOTIFY_INTERVAL
     
   done 
 )
