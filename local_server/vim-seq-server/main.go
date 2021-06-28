@@ -16,8 +16,6 @@ import (
 )
 
 func main() {
-	fmt.Println("vim-go")
-
 	conn, err := itermctl.GetCredentialsAndConnect("itermctl_statusbar_example", true)
 	F(err)
 	_conn = conn
@@ -25,22 +23,14 @@ func main() {
 	F(err)
 	_app = app
 	go monitor_control_seq()
-
 	for {
 		time.Sleep(5 * time.Second)
 	}
 }
-func init() {
-}
 func monitor_control_seq() {
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
 	re := regexp.MustCompile("^test-seq:.*")
-	fmt.Println(
-		"CONTROL_SEQUENCE_NAME:", CONTROL_SEQUENCE_NAME,
-	)
 	notifications, err := itermctl.MonitorCustomControlSequences(ctx, _conn, CONTROL_SEQUENCE_NAME, re, itermctl.AllSessions)
 	F(err)
 
@@ -56,11 +46,7 @@ CONTROL_SEQUENCE_NAME: %v
 	dm := func() {
 		select {
 		case notification := <-notifications:
-			pp.Println("New Sequence!")
-			pp.Println(fmt.Sprintf(`Session: %s`, notification.Notification.GetSession()))
-			pp.Println(fmt.Sprintf(`Matches qty: %d`, len(notification.Matches)))
 			for _, m := range notification.Matches {
-				pp.Println(fmt.Sprintf(`   Match:     %d bytes`, len(m)))
 				if len(strings.Split(m, `:`)) == 2 {
 					seq_json := map[string]interface{}{}
 					seq_enc := strings.Split(m, `:`)[1]
