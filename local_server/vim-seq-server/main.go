@@ -37,8 +37,8 @@ type ActiveVim struct {
 	Hostname       string `json:"hostname";`
 	Cwd            string `json:"cwd";`
 	SSH_CONNECTION string `json:"SSH_CONNECTION";`
+	ITERM_SESSION_ID string `json:"ITERM_SESSION_ID";`
 	User           string `json:"user";`
-	Pid            int64
 	Ts             int64
 	Expires_ts     int64
 	Payload        ActiveVimPayload `json:"dat";`
