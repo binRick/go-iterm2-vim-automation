@@ -31,6 +31,8 @@ import (
 
 func init_mack() {
 	if false {
+	}
+	if true {
 		mack.Notify("Complete")
 		response, err := mack.Dialog("Enter a ToDo", "ToDo Wizard", "My new ToDo")
 		F(err)
@@ -50,6 +52,9 @@ func init_mack() {
 	}
 }
 func init() {
+if false {
+	init_mack()
+}
 	go get_procs()
 	tempFile, err := ioutil.TempFile("", "*-custom_control_test")
 	F(err)
@@ -90,19 +95,18 @@ CONTROL_SEQUENCE_NAME: %v
 			for _, m := range notification.Matches {
 				pp.Println(fmt.Sprintf(`   Match:     %d bytes`, len(m)))
 				if len(strings.Split(m, `:`)) == 2 {
+					seq_json := map[string]interface{}{}
 					seq_enc := strings.Split(m, `:`)[1]
+
 					seq_dec, err := base64.StdEncoding.DecodeString(seq_enc)
 					F(err)
-					seq_dec_trimmed := strings.Trim(fmt.Sprintf(`%s`, seq_dec),"")
 
-					//seq_dec_str := string(seq_dec)
-					seq_json := map[string]interface{}{}
+					seq_dec_trimmed := strings.Trim(fmt.Sprintf(`%s`, seq_dec), "")
 
 					dec_err := json.Unmarshal([]byte(seq_dec_trimmed), &seq_json)
 					F(dec_err)
 
 					pp.Println(
-						//		seq_dec_str,
 						seq_json,
 					)
 				}
@@ -111,9 +115,30 @@ CONTROL_SEQUENCE_NAME: %v
 		}
 	}
 
-		for {
-	dm()
-		}
+	for {
+		dm()
+	}
+}
+
+func (V *ActiveVim) IsValid() bool {
+	v := false
+	V.expires_ts = int64(V.ts) + int64(V.interval)
+	if time.Now().Unix() < V.expires_ts {
+		v = true
+	}
+
+	return v
+}
+
+type ActiveVim struct {
+	pid        int64
+	file       string
+	ts         int64
+	interval   int64
+	expires_ts int64
+}
+type ActiveVims struct {
+	Vims *ActiveVim
 }
 
 const (
