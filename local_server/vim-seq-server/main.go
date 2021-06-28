@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/manifoldco/promptui"
+
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -11,8 +13,13 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"mrz.io/itermctl"
+	"github.com/c-bata/go-prompt"
 
 	"github.com/k0kubun/pp"
+)
+
+const (
+SEQ_PREFIX = `test-seq`
 )
 
 func main() {
@@ -27,10 +34,39 @@ func main() {
 		time.Sleep(5 * time.Second)
 	}
 }
+func pui() {
+items := []string{"Vim", "Emacs", "Sublime", "VSCode", "Atom"}
+	index := -1
+	var result string
+	var err error
+
+	for index < 0 {
+		prompt := promptui.SelectWithAdd{
+			Label:    "What's your text editor",
+			Items:    items,
+			AddLabel: "Other",
+		}
+
+		index, result, err = prompt.Run()
+
+		if index == -1 {
+			items = append(items, result)
+		}
+	}
+
+	if err != nil {
+		fmt.Printf("Prompt failed %v\n", err)
+		return
+	}
+
+	fmt.Printf("You choose %s\n", result)
+}
 func monitor_control_seq() {
+pui()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	re := regexp.MustCompile("^test-seq:.*")
+	re := regexp.MustCompile(fmt.Sprintf("^%s:.*",SEQ_PREFIX))
 	notifications, err := itermctl.MonitorCustomControlSequences(ctx, _conn, CONTROL_SEQUENCE_NAME, re, itermctl.AllSessions)
 	F(err)
 
@@ -38,11 +74,13 @@ func monitor_control_seq() {
  ** Waiting for control sequeunces **
 
 CONTROL_SEQUENCE_NAME: %v
+SEQ_PREFIX: %v
 
 `,
 		CONTROL_SEQUENCE_NAME,
+		SEQ_PREFIX,
 	)
-	pp.Println(msg)
+	fmt.Println(msg)
 	dm := func() {
 		select {
 		case notification := <-notifications:
