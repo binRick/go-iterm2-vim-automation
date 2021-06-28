@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"mrz.io/itermctl"
@@ -16,8 +17,21 @@ import (
 
 func main() {
 	fmt.Println("vim-go")
-}
 
+	conn, err := itermctl.GetCredentialsAndConnect("itermctl_statusbar_example", true)
+	F(err)
+	_conn = conn
+	app, err := itermctl.NewApp(_conn)
+	F(err)
+	_app = app
+	go monitor_control_seq()
+
+	for {
+		time.Sleep(5 * time.Second)
+	}
+}
+func init() {
+}
 func monitor_control_seq() {
 
 	ctx, cancel := context.WithCancel(context.Background())
