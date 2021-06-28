@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
-cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+ORIG_DIR="$(pwd)"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ARGS="$@"
 vim="$(export PATH="/bin:/usr/bin:/usr/local/bin" && command -v vim)"
 NOTIFY_INTERVAL=${NOTIFY_INTERVAL:-5}
@@ -10,24 +11,33 @@ cwd="$(pwd)"
 bg_pid=$$
 jo_cmd="command jo cmd='$cmd' cwd='$cwd' vim='$vim' args='$ARGS' pid=$bg_pid"
 
-swap_files(){
-  lsof -p $bg_pid | grep '/.*/.*\.swp'|tr -s ' '|cut -d' ' -f9|sort -u|grep -v '^$'|tr '\n' ' '
+swap_file(){
+  lsof -p $bg_pid | grep '/.*/.*\.swp'|tr -s ' '|cut -d' ' -f9|sort -u|grep -v '^$'
 }
 
-eval $jo_cmd | ./gen_seq.sh
+get_file(){
+  f="$(swap_file)"
+  dn="$(dirname "$f")"
+  f="$(basename "$f")"
+  echo -e "$f"|sed 's/^\.//g'|sed 's/\.swp$//g'
+}
+
+eval $jo_cmd | $SCRIPT_DIR/gen_seq.sh
 
 export EXIT=0
 
 bg_monitor()(
   while [[ "$EXIT" != "1" && -d /proc/$bg_pid && "$bg_pid" -gt 0 ]]; do
-    eval $ncmd| ./gen_seq.sh
-ncmd="$jo_cmd swap_files='$(swap_files)' NOTIFY_INTERVAL=$NOTIFY_INTERVAL"
-    
+#swap_file="$(swap_file)"
+#swap_bytes="$(stat -c %s $swap_file)"
+
+    ncmd="$jo_cmd swap_file='$(swap_file)' NOTIFY_INTERVAL=$NOTIFY_INTERVAL file='$(get_file)' swap_bytes='123'"
+    eval $ncmd| $SCRIPT_DIR/gen_seq.sh
     sleep $NOTIFY_INTERVAL
     
   done 
 )
 
 bg_monitor &
-
+cd "$ORIG_DIR"
 exec $cmd
