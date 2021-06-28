@@ -373,6 +373,48 @@ func HandleCloseWindowID(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+/*
+var (
+	OPEN_SESSION_ACTIVATE   = true
+	OPEN_SESSION_SELECT_TAB = true
+)
+*/
+func HandleOpenSessionID(w http.ResponseWriter, r *http.Request) {
+	session_id := mux.Vars(r)["session_id"]
+	tab_id := mux.Vars(r)["tab_id"]
+
+	msg := fmt.Sprintf(`Selecting Session %s | Tab %s | `, session_id, tab_id)
+
+	//pp.Println(msg)
+	session := _app.Session(session_id)
+	pre_sess_active := session.Active()
+	if !pre_sess_active { //&& OPEN_SESSION_ACTIVATE {
+		F(session.Activate())
+	}
+	post_sess_active := session.Active()
+	selected_tab, err := _app.SelectedTabId()
+	F(err)
+
+	if tab_id != selected_tab { //&& OPEN_SESSION_SELECT_TAB {
+		F(_app.SelectTab(tab_id))
+	}
+
+	post_selected_tab, err := _app.SelectedTabId()
+	F(err)
+
+	fmt.Println(
+		pp.Sprintf(`Pre session active? %v | `, pre_sess_active),
+		pp.Sprintf(`Post session active? %v | `, post_sess_active),
+		pp.Sprintf(`App Selected Tab: %s | `, selected_tab),
+		pp.Sprintf(`Post App Selected Tab: %s | `, post_selected_tab),
+		pp.Sprintf(`Requested Tab: %s | `, tab_id),
+		//pp.Sprintf(`session: %s`, session),
+	)
+	response := fmt.Sprintf(`OK- %s`, msg)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, string(response))
+	return
+}
 func HandleActivateWindowID(w http.ResponseWriter, r *http.Request) {
 	window_id := mux.Vars(r)["window_id"]
 	session_id := mux.Vars(r)["session_id"]

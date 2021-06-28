@@ -1,9 +1,9 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
 	"io/ioutil"
-	"sync"
 	"time"
 
 	"dev.local/osxkeystrokes"
@@ -13,23 +13,16 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type KeyCode struct {
-	Name   string   `yaml:"Name";`
-	Action string   `yaml:"Action";`
-	Keys   keySlice `yaml:"Keys";`
+var HELD_KEYS = []string{
+	`left-option`,
+	`right-option`,
+	`left-shift`,
+	`right-shift`,
+	`left-ctrl`,
+	`right-ctrl`,
 }
-
-type LastKeyTracker struct {
-	LastKeys  keySlice
-	MaxLength int
-	m         sync.Mutex
-}
-type KeyTracker LastKeyTracker
-type KeyCodes *[]KeyCode
 
 var key_codes KeyCodes
-
-type keySlice []string
 
 var key_tracker = KeyTracker{MaxLength: 10}
 
@@ -59,6 +52,54 @@ var rate_counters = map[string]*ratecounter.RateCounter{
 //counter.Incr(1)
 //counter.Rate()
 
+type HeldKey struct {
+	Key         string
+	Hash        string
+	Qty         int64
+	Rate        *ratecounter.RateCounter
+	LastDepress time.Time
+}
+
+type HeldKeys map[string]*HeldKey
+
+func (hks *HeldKeys) GetHeld() []string {
+	held := []string{}
+	for _, hk := range *hks {
+		if hk.IsHeld() {
+			held = append(held, hk.Key)
+		}
+	}
+	return held
+}
+
+var held_keys = HeldKeys{}
+
+func (hks *HeldKeys) KeyIsHeld(k string) bool {
+	h := false
+	for _, hk := range *hks {
+		if hk.Key == fmt.Sprintf(`[%s]`, k) && hk.IsHeld() {
+			h = true
+		}
+	}
+	return h
+}
+func (hk *HeldKey) IsHeld() bool {
+	found := false
+	for _, HELD_KEY := range HELD_KEYS {
+		if hk.Key == fmt.Sprintf(`[%s]`, HELD_KEY) {
+			found = true
+		}
+	}
+	if !found {
+		return false
+	}
+	ih := (hk.Qty % 2) == 0
+	if ih {
+		hk.LastDepress = time.Now()
+	}
+	return ih
+}
+
 func parse_key_codes() {
 	data, err := ioutil.ReadFile(`key_codes.yaml`)
 	utils.F(err)
@@ -70,25 +111,64 @@ func parse_key_codes() {
 
 func key_logged(msg string) {
 	rate_counter.Incr(1)
+	//shift_is_held := false
+	hash := fmt.Sprintf(`%x`, md5.Sum([]byte(fmt.Sprintf(`%s`, msg))))
+	_, has := held_keys[hash]
+	if !has {
+		held_keys[hash] = &HeldKey{
+			Key:  msg,
+			Hash: hash,
+			Qty:  1,
+			Rate: ratecounter.NewRateCounter(1000 * time.Millisecond),
+			//pp.Println(HV)
+		}
+	}
+	hk, _ := held_keys[hash]
+	hk.Qty = hk.Qty + 1
+	hk.Rate.Incr(1)
+
 	for k, _ := range rate_counters {
 		if msg == fmt.Sprintf(`[%s]`, k) {
 			rate_counters[k].Incr(1)
 		}
 	}
 	fmt.Println(fmt.Sprintf(`
-	| =============================
-	| Key Logged:                %s
-	| Key Rate/sec:              %d
-	| ==
-	| Clear Key Rate/sec:        %d
-	| Equals Key Rate/sec:       %d
-	| Divide Key Rate/sec:       %d
-	| Asterisk Key Rate/sec:     %d
-	| =============================
+| =============================
+| Key Logged:                 %s
+| Key Rate/sec: v             %d
+| == Modifiers
+|  Left Shift?                %v
+|  Left Control?              %v
+| ==
+| Held Key:
+|  Had?                       %v
+|  Hash:                      %v
+|  Key:                       %v
+|  Qty:                       %v
+|  Rate:                      %v
+|  Time Since Last Depress:   %s
+|  Is Held?                   %v
+| ==
+| Clear Key Rate/sec:        %d
+| Equals Key Rate/sec:       %d
+| Divide Key Rate/sec:       %d
+| Asterisk Key Rate/sec:     %d
+| =============================
 
 	`,
 		pp.Sprintf(`%s`, msg),
 		rate_counter.Rate()*1,
+
+		held_keys.KeyIsHeld(`left-shift`),
+		held_keys.KeyIsHeld(`left-ctrl`),
+
+		has,
+		hash,
+		hk.Key,
+		hk.Qty,
+		hk.Rate.Rate(),
+		time.Since(hk.LastDepress),
+		hk.IsHeld(),
 
 		rate_counters[`clear`].Rate(),
 		rate_counters[`equals`].Rate(),

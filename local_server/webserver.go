@@ -210,6 +210,7 @@ func add_routes(router *mux.Router) {
 	router.HandleFunc("/api/vims/list", HandleListVims).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/list", HandleListIterm2).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/info", HandleInfoIterm2).Methods(http.MethodGet)
+	router.HandleFunc("/api/iterm2/open/session/{session_id:.*}/tab/{tab_id:.*}", HandleOpenSessionID).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/activate/window/{window_id:.*}/session/{session_id:.*}/tab/{tab_id:.*}", HandleActivateWindowID).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/test/window/{window_id:.*}/session/{session_id:.*}/tab/{tab_id:.*}", HandleTestWindowID).Methods(http.MethodGet)
 	router.HandleFunc("/api/iterm2/dump/session/{session_id:.*}", HandleDumpSessionContents).Methods(http.MethodGet)

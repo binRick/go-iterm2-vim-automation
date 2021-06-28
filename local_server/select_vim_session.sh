@@ -28,7 +28,7 @@ items_cmd="./get_vim_sessions.sh"
 fzf_cmd="fzf --height 100% --layout=reverse --info inline --border \
     --ansi \
     --header='$FZF_TITLE' \
-    --preview='echo passh ./test_session.sh {}' \
+    --preview='echo passh ./open_selected_iterm2_session.sh {}' \
     --header-lines=0 \
     --border=sharp \
     -m \
