@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+ARGS="$@"
+vim="$(export PATH="/bin:/usr/bin:/usr/local/bin" && command -v vim)"
+
+cmd="$vim $ARGS"
+cwd="$(pwd)"
+jo_cmd="command jo cmd='$cmd' cwd='$cwd' vim='$vim' args='$ARGS'"
+eval $jo_cmd | ./gen_seq.sh
+
+exec $cmd

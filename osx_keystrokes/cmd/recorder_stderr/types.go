@@ -2,7 +2,21 @@ package main
 
 import (
 	"sync"
+"time"
+ "github.com/paulbellamy/ratecounter"
+
 )
+
+type HeldKey struct {
+  Key         string
+  Hash        string
+  Qty         int64
+  Rate        *ratecounter.RateCounter
+  LastDepress time.Time
+}
+
+type HeldKeys map[string]*HeldKey
+
 
 type KeyCode struct {
 	Name   string   `yaml:"Name";`

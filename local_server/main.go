@@ -23,11 +23,32 @@ import (
 	"github.com/pterm/pterm"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/andybrewer/mack"
 	"github.com/shirou/gopsutil/process"
 	"mrz.io/itermctl"
 	"mrz.io/itermctl/rpc"
 )
 
+func init_mack() {
+	if false {
+		mack.Notify("Complete")
+		response, err := mack.Dialog("Enter a ToDo", "ToDo Wizard", "My new ToDo")
+		F(err)
+		pp.Println(response)
+	}
+	if true {
+		list := mack.ListOptions{
+			Items:         []string{"item one", "item two"},
+			Title:         "My List Title",
+			Message:       "Pick one or more items from this list",
+			DefaultItems:  []string{"item one"},
+			AllowMultiple: true,
+		}
+		selected, didCancel, err := mack.ListWithOpts(list)
+		F(err)
+		pp.Println(selected, didCancel)
+	}
+}
 func init() {
 	go get_procs()
 	tempFile, err := ioutil.TempFile("", "*-custom_control_test")
@@ -38,27 +59,61 @@ func init() {
 	F(err)
 	pp.Println(tempFile.Name())
 }
+
 func monitor_control_seq() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	re := regexp.MustCompile("test-seq")
+	re := regexp.MustCompile("^test-seq:.*")
 	fmt.Println(
 		"CONTROL_SEQUENCE_NAME:", CONTROL_SEQUENCE_NAME,
 	)
 	notifications, err := itermctl.MonitorCustomControlSequences(ctx, _conn, CONTROL_SEQUENCE_NAME, re, itermctl.AllSessions)
 	F(err)
 
-	select {
-	case notification := <-notifications:
-		pp.Println(notification.Notification.GetSession())
-		pp.Println(notification.Matches[0])
+	msg := fmt.Sprintf(`
+ ** Waiting for control sequeunces **
+
+CONTROL_SEQUENCE_NAME: %v
+
+`,
+		CONTROL_SEQUENCE_NAME,
+	)
+	pp.Println(msg)
+	dm := func() {
+		select {
+		case notification := <-notifications:
+			pp.Println("New Sequence!")
+			pp.Println(fmt.Sprintf(`Session: %s`, notification.Notification.GetSession()))
+			pp.Println(fmt.Sprintf(`Matches qty: %d`, len(notification.Matches)))
+			for _, m := range notification.Matches {
+				pp.Println(fmt.Sprintf(`   Match:     %d bytes`, len(m)))
+				if len(strings.Split(m, `:`)) == 2 {
+					seq_enc := strings.Split(m, `:`)[1]
+					seq_dec, err := base64.StdEncoding.DecodeString(seq_enc)
+					F(err)
+					seq_dec_trimmed := strings.Trim(fmt.Sprintf(`%s`, seq_dec),"")
+
+					//seq_dec_str := string(seq_dec)
+					seq_json := map[string]interface{}{}
+
+					dec_err := json.Unmarshal([]byte(seq_dec_trimmed), &seq_json)
+					F(dec_err)
+
+					pp.Println(
+						//		seq_dec_str,
+						seq_json,
+					)
+				}
+
+			}
+		}
 	}
 
-	for {
-		time.Sleep(5 * time.Second)
-	}
+		for {
+	dm()
+		}
 }
 
 const (
@@ -373,6 +428,7 @@ func HandleCloseWindowID(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
 /*
 var (
 	OPEN_SESSION_ACTIVATE   = true
@@ -568,10 +624,10 @@ func main() {
 	F(err)
 	_app = app
 	monitor_focus()
-	monitor_keystrokes(conn)
 	if MONITOR_CONTROL_SEQUENCE {
 		go monitor_control_seq()
 	}
+	monitor_keystrokes(conn)
 	signals := make(chan os.Signal)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 

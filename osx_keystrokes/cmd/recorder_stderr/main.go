@@ -17,9 +17,12 @@ var HELD_KEYS = []string{
 	`left-option`,
 	`right-option`,
 	`left-shift`,
+	`left-cmd`,
+	`right-cmd`,
 	`right-shift`,
 	`left-ctrl`,
 	`right-ctrl`,
+	`caps`,
 }
 
 var key_codes KeyCodes
@@ -51,16 +54,6 @@ var rate_counters = map[string]*ratecounter.RateCounter{
 
 //counter.Incr(1)
 //counter.Rate()
-
-type HeldKey struct {
-	Key         string
-	Hash        string
-	Qty         int64
-	Rate        *ratecounter.RateCounter
-	LastDepress time.Time
-}
-
-type HeldKeys map[string]*HeldKey
 
 func (hks *HeldKeys) GetHeld() []string {
 	held := []string{}
@@ -139,6 +132,9 @@ func key_logged(msg string) {
 | == Modifiers
 |  Left Shift?                %v
 |  Left Control?              %v
+|  Left Option?               %v
+|  Left Command?              %v
+|  Caps?                      %v
 | ==
 | Held Key:
 |  Had?                       %v
@@ -161,6 +157,9 @@ func key_logged(msg string) {
 
 		held_keys.KeyIsHeld(`left-shift`),
 		held_keys.KeyIsHeld(`left-ctrl`),
+		held_keys.KeyIsHeld(`left-option`),
+		held_keys.KeyIsHeld(`left-cmd`),
+		held_keys.KeyIsHeld(`caps`),
 
 		has,
 		hash,

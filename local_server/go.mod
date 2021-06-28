@@ -9,6 +9,7 @@ replace mrz.io/itermctl => ./../dist/go_itermctl
 require (
 	dev.local/types v0.0.0-00010101000000-000000000000
 	github.com/StackExchange/wmi v0.0.0-20210224194228-fe8f1750fd46 // indirect
+	github.com/andybrewer/mack v0.0.0-20200226161639-15be3d47cc54 // indirect
 	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/k0kubun/pp v3.0.1+incompatible
