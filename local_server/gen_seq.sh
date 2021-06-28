@@ -23,5 +23,4 @@ encode_cmd="base64 -w0"
 DAT="$(eval $jo_cmd | command jq -Mrc | $encode_cmd)"
 
 msg="\033]1337;Custom=id=${CONTROL_SEQUENCE_NAME}:${CONTROL_SEQUENCE_PREFIX}:${DAT}\a"
-echo -e "$msg"
-
+echo -ne "$msg"
