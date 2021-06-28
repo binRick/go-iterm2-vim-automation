@@ -19,20 +19,29 @@ import (
 
 func (V *ActiveVim) IsValid() bool {
 	v := false
-	V.expires_ts = int64(V.ts) + int64(V.interval)
-	if time.Now().Unix() < V.expires_ts {
+	V.Expires_ts = int64(V.Ts) + int64(V.Payload.Interval)
+	if time.Now().Unix() < V.Expires_ts {
 		v = true
 	}
 
 	return v
 }
 
+type ActiveVimPayload struct {
+	SwapFile string `json:"swap_file";`
+	Pid      int64
+	Interval int64  `json:"NOTIFY_INTERVAL";`
+	File     string `json:"file";`
+}
 type ActiveVim struct {
-	pid        int64
-	file       string
-	ts         int64
-	interval   int64
-	expires_ts int64
+	Hostname       string `json:"hostname";`
+	Cwd            string `json:"cwd";`
+	SSH_CONNECTION string `json:"SSH_CONNECTION";`
+	User           string `json:"user";`
+	Pid            int64
+	Ts             int64
+	Expires_ts     int64
+	Payload        ActiveVimPayload `json:"dat";`
 }
 type ActiveVims struct {
 	Vims *ActiveVim
@@ -84,7 +93,9 @@ func pui() {
 	fmt.Printf("You choose %s\n", result)
 }
 func monitor_control_seq() {
-	pui()
+	if false {
+		pui()
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -108,7 +119,8 @@ SEQ_PREFIX: %v
 		case notification := <-notifications:
 			for _, m := range notification.Matches {
 				if len(strings.Split(m, `:`)) == 2 {
-					seq_json := map[string]interface{}{}
+					//					seq_json := map[string]interface{}{}
+					seq_json := ActiveVim{}
 					seq_enc := strings.Split(m, `:`)[1]
 
 					seq_dec, err := base64.StdEncoding.DecodeString(seq_enc)
@@ -118,6 +130,7 @@ SEQ_PREFIX: %v
 
 					dec_err := json.Unmarshal([]byte(seq_dec_trimmed), &seq_json)
 					F(dec_err)
+					seq_json.IsValid()
 
 					pp.Println(
 						seq_json,

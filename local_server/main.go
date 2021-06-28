@@ -30,7 +30,7 @@ import (
 )
 
 func init_mack() {
-	if false {
+  	if false {
 	}
 	if true {
 		mack.Notify("Complete")
