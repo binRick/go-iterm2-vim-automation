@@ -13,12 +13,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"mrz.io/itermctl"
-	"github.com/c-bata/go-prompt"
 
 	"github.com/k0kubun/pp"
 )
 
-<<<<<<< HEAD
 func (V *ActiveVim) IsValid() bool {
 	v := false
 	V.expires_ts = int64(V.ts) + int64(V.interval)
@@ -39,11 +37,10 @@ type ActiveVim struct {
 type ActiveVims struct {
 	Vims *ActiveVim
 }
-=======
+
 const (
-SEQ_PREFIX = `test-seq`
+	SEQ_PREFIX = `test-seq`
 )
->>>>>>> b4a99523bcab46d04a9c76f38b645620ec98c9a0
 
 func main() {
 
@@ -60,7 +57,7 @@ func main() {
 	}
 }
 func pui() {
-items := []string{"Vim", "Emacs", "Sublime", "VSCode", "Atom"}
+	items := []string{"Vim", "Emacs", "Sublime", "VSCode", "Atom"}
 	index := -1
 	var result string
 	var err error
@@ -87,11 +84,11 @@ items := []string{"Vim", "Emacs", "Sublime", "VSCode", "Atom"}
 	fmt.Printf("You choose %s\n", result)
 }
 func monitor_control_seq() {
-pui()
+	pui()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	re := regexp.MustCompile(fmt.Sprintf("^%s:.*",SEQ_PREFIX))
+	re := regexp.MustCompile(fmt.Sprintf("^%s:.*", SEQ_PREFIX))
 	notifications, err := itermctl.MonitorCustomControlSequences(ctx, _conn, CONTROL_SEQUENCE_NAME, re, itermctl.AllSessions)
 	F(err)
 

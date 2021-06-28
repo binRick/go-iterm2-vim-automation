@@ -22,7 +22,7 @@ get_file(){
   echo -e "$f"|sed 's/^\.//g'|sed 's/\.swp$//g'
 }
 
-eval $jo_cmd | $SCRIPT_DIR/gen_seq.sh
+eval $jo_cmd | $SCRIPT_DIR/gen_seq.sh >/dev/null 2>&1
 
 export EXIT=0
 
@@ -32,7 +32,7 @@ bg_monitor()(
 #swap_bytes="$(stat -c %s $swap_file)"
 
     ncmd="$jo_cmd swap_file='$(swap_file)' NOTIFY_INTERVAL=$NOTIFY_INTERVAL file='$(get_file)' swap_bytes='123'"
-    eval $ncmd| $SCRIPT_DIR/gen_seq.sh
+    eval $ncmd| $SCRIPT_DIR/gen_seq.sh >/dev/null 2>&1
     sleep $NOTIFY_INTERVAL
     
   done 
