@@ -15,7 +15,30 @@ import (
 	"github.com/k0kubun/pp"
 )
 
+func (V *ActiveVim) IsValid() bool {
+	v := false
+	V.expires_ts = int64(V.ts) + int64(V.interval)
+	if time.Now().Unix() < V.expires_ts {
+		v = true
+	}
+
+	return v
+}
+
+type ActiveVim struct {
+	pid        int64
+	file       string
+	ts         int64
+	interval   int64
+	expires_ts int64
+}
+type ActiveVims struct {
+	Vims *ActiveVim
+}
+
 func main() {
+
+	pp.Println(&ActiveVim{})
 	conn, err := itermctl.GetCredentialsAndConnect("itermctl_statusbar_example", true)
 	F(err)
 	_conn = conn

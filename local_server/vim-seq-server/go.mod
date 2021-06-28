@@ -12,3 +12,5 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	mrz.io/itermctl v0.0.3
 )
+
+replace dev.local/localserver => ./../../local_server/.
