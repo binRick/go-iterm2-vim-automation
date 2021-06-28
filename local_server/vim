@@ -6,7 +6,22 @@ vim="$(export PATH="/bin:/usr/bin:/usr/local/bin" && command -v vim)"
 
 cmd="$vim $ARGS"
 cwd="$(pwd)"
-jo_cmd="command jo cmd='$cmd' cwd='$cwd' vim='$vim' args='$ARGS'"
+bg_pid=$$
+jo_cmd="command jo cmd='$cmd' cwd='$cwd' vim='$vim' args='$ARGS' pid=$bg_pid"
+
 eval $jo_cmd | ./gen_seq.sh
+
+export EXIT=0
+
+bg_monitor()(
+  while [[ "$EXIT" != "1" && -d /proc/$bg_pid && "$bg_pid" -gt 0 ]]; do
+    eval $jo_cmd | ./gen_seq.sh
+    
+    sleep 5
+    
+  done 
+)
+
+bg_monitor &
 
 exec $cmd

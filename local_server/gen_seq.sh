@@ -15,7 +15,7 @@ fi
 
 cwd="$(pwd)"
 
-jo_cmd="jo dat='$(echo -e "$DAT"|jq -Mrc)' ts=$(date +%s) hostname='$(hostname -f)' user=$(id -nu) cwd='$cwd' ITERM_SESSION_ID='$ITERM_SESSION_ID' ITERM_PROFILE='$ITERM_PROFILE' pid=$$"
+jo_cmd="jo dat='$(echo -e "$DAT"|jq -Mrc)' ts=$(date +%s) hostname='$(command hostname -f)' user=$(id -nu) cwd='$cwd' ITERM_SESSION_ID='$ITERM_SESSION_ID' ITERM_PROFILE='$ITERM_PROFILE' pid=$$"
 encode_cmd="base64 -w0"
 DAT="$(eval $jo_cmd | jq -Mrc | $encode_cmd)"
 
