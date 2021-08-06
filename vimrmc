@@ -1,0 +1,80 @@
+hi Search ctermfg=Yellow ctermbg=NONE cterm=bold,underline
+" highlight Comment ctermbg=DarkGray
+highlight Comment ctermbg=Blue ctermfg=White
+"
+highlight Constant ctermbg=Blue
+"highlight Normal ctermbg=Black
+"highlight NonText ctermbg=Black
+"highlight Special ctermbg=DarkMagenta
+"highlight Cursor ctermbg=Green
+highlight Comment cterm=underline ctermbg=Blue ctermfg=White
+
+
+set tabstop=2            " number of visual spaces per TAB
+set softtabstop=2     " number of spaces in tab when editing
+set shiftwidth=2        " number of spaces in tab when editing
+set expandtab           " tabs are spaces
+syntax on
+"  colorscheme distinguished
+" colorscheme codedark
+"colorscheme jinja
+"colorscheme dark_plus
+source ~/obsession.vim
+source ~/.vim/go.vim
+filetype plugin indent on
+"#g:go_fmt_commands
+
+au BufWritePost *.go !gofmt -w %
+"#au BufWritePre *.go Fmt
+"autocmd BufWritePre *.go Fmt
+
+
+
+
+
+
+colorscheme molokai     "  awesome colorscheme
+" set number              " Show line numbers
+set tabstop=2           " number of visual spaces per TAB
+" set softtabstop=4       " number of spaces in tab when editing
+set shiftwidth=2        " number of spaces in tab when editing
+set expandtab           " tabs are spaces
+set showcmd             " show command in bottom bar
+"set cursorline          " highlight current line
+"set cursorcolumn        " highlight current column
+set wildmenu            " visual autocomplete for command menu
+set showmatch           " highlight matching
+set incsearch           " search as characters are entered
+set hlsearch            " highlight matches
+syntax enable           " enable syntax processing
+" filetype indent on      " load filetype-specific indent files
+
+"
+" "---------------------------------------------------------------
+" " Code Portion
+" "---------------------------------------------------------------
+"
+"  To add the proper PEP 8 indentation
+au BufNewFile,BufRead *.py set tabstop=5
+au BufNewFile,BufRead *.py set softtabstop=4
+au BufNewFile,BufRead *.py set shiftwidth=4
+au BufNewFile,BufRead *.py set expandtab
+au BufNewFile,BufRead *.py set autoindent
+au BufNewFile,BufRead *.py set fileformat=unix
+" au BufNewFile,BufRead *.py set textwidth=79
+
+" Use the below highlight group when displaying bad whitespace is desired.
+highlight BadWhitespace ctermbg=red guibg=red
+"
+" Flagging Unnecessary Whitespace
+"au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+
+" Remove below line
+" au FileType *.yaml setlocal ai ts=2 sw=2 et
+
+" UTF-8 Support
+set encoding=utf-8
+
+" Make code look pretty
+let python_highlight_all=1
+syntax on
